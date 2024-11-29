@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
+from matplotlib.patches import Rectangle, Circle, Ellipse
 
 
 def draw_fretboard(show_notes=True, chord=[[0,0]]):
@@ -17,6 +17,11 @@ def draw_fretboard(show_notes=True, chord=[[0,0]]):
     ax.plot([0, 0], [-0.5, 5.5], color='white', lw=2)  # fret 0 is white 
     for fret in range(1,num_frets + 1):
         ax.plot([fret, fret], [-0.5, 5.5], color=(0.6, 0.482, 0.0), lw=2)  # Line width as fret thickness
+
+    # Draw circles on 3rd, 5th, 7th, 9th and 11th fret
+    for i in range(5):
+        circle = Ellipse((2.5+2*i, 2.5), width=0.05, height=0.1, color='white', edgecolor='black')  # Adjust position and radius as needed
+        ax.add_patch(circle)
 
     # Optionally add notes
     if show_notes:

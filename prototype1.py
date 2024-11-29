@@ -12,8 +12,10 @@ if 'show_notes' not in st.session_state:
 # Using containers for vertical organization
 intro_container = st.container()
 with intro_container:
-    st.title("Guitar Fretboard Design App")
-    st.write("This section provides an overview of the application and user instructions.")
+    st.title("Guitar_0")
+    st.write("This application serves as an interactive handbook for anyone trying to learn how to improvise. Pick a scale, a root note and the mode you want to play.")
+    st.write("You will see all the possible chords which are allowed. Furthermore you can see possible and commonly used chord progressions")
+    st.write("The visual guitar shows you where you have to land your fingers on the fretboard. It is particularly useful for people trying to switch from the piano to the guitar.")
 
 # Layout with left sidebar, main content, and right sidebar
 left_sidebar, spacer, image_col1, right_sidebar = st.columns([1,1, 4, 1])  # Adjust the ratio as needed
@@ -44,7 +46,8 @@ with left_sidebar:
         st.write("Locrian Mode")
 
 with spacer:
-    st.title("Choose Key")
+    pass
+    #st.title("Choose Key")
 
 with right_sidebar:
     st.title("Right Sidebar")
@@ -90,11 +93,14 @@ with image_col1:
     st.title("1st Fretboard")
     for i, fig in enumerate(fretboard_figures):
         st.pyplot(fig)
+
+"""
         st.download_button(
             label=f"Download Fretboard1 {i + 1} as PDF",
             data=save_plot_as_file(fig, file_format="pdf"),
             file_name=f"fretboard_{i + 1}.pdf",
             mime="application/pdf"
         )
+"""
 
 

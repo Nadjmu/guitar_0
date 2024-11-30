@@ -48,6 +48,7 @@ def draw_fretboard(show_notes=True, chord=[[0,0]]):
 #wine red color=(0.627, 0.078, 0.157)
     ax.set_ylim(-0.5, 5.5)
     ax.axis('off')  # Hide axes
+    
     return fig
 
 chord1=[[0,0],[1,1],[3,4]]

@@ -272,7 +272,7 @@ with fretboard_col:
 
             for i,fig in enumerate(figures):
                 if st.session_state['recording']:
-                    st.subheader(chord_label[i])
+                    st.markdown("##### "+chord_label[i])
                 st.pyplot(fig)
 
 # Using an expander for additional options

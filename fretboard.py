@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Circle, Ellipse
 
+notes_color = [(0.627, 0.078, 0.157),(0.727, 0.178, 0.257),(0.827, 0.278, 0.357)]
 
 def draw_fretboard(show_notes=True, chord=[[0,0]]):
     chromatic_scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'bB', 'B']
@@ -42,7 +43,7 @@ def draw_fretboard(show_notes=True, chord=[[0,0]]):
         highlight_string = highlighted_note[1]
         highlight_width = 0.38          #golden ratio
         highlight_height = 0.3
-        ax.add_patch(Rectangle((highlight_fret-highlight_width, highlight_string - highlight_height/2), highlight_width-0.025, highlight_height, color=(0.627, 0.078, 0.157), alpha=1.0, zorder=3))
+        ax.add_patch(Rectangle((highlight_fret-highlight_width, highlight_string - highlight_height/2), highlight_width-0.025, highlight_height, color=notes_color[highlighted_note[2]], alpha=1.0, zorder=3))
     
 
 #wine red color=(0.627, 0.078, 0.157)
@@ -51,7 +52,7 @@ def draw_fretboard(show_notes=True, chord=[[0,0]]):
     
     return fig
 
-chord1=[[0,0],[1,1],[3,4]]
-a_minor = [[0,1],[2,2],[2,3],[1,4],[0,5]]
-draw_fretboard(show_notes=True,chord = a_minor)
-plt.show()
+#chord1=[[0,0],[1,1],[3,4]]
+#a_minor = [[0,1],[2,2],[2,3],[1,4],[0,5]]
+#draw_fretboard(show_notes=True,chord = a_minor)
+#plt.show()

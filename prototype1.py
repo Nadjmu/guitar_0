@@ -7,10 +7,12 @@ import numpy as np
 st.set_page_config(layout="wide")
 
 chromatic_scale = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
-modes = ['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Myxolodian', 'Aoelian', 'Locrian']
+modes_diatonic = ['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Myxolodian', 'Aoelian', 'Locrian']
 chord_type = ['Major', 'Minor', 'Diminished', 'Augmented']
 chord_type_abbr = ['maj', 'min', 'dim', 'aug']
 diatonic_intervals = ['W','W','H','W','W','W','H']
+harmonic_minor_intervals = ['W','H','W','W','H','WH','H']
+modes_harmonic_minor =['Harmonic Minor', 'Locrian', 'Ionian', 'Dorian', 'Phrygian Dominant', 'Lydian', 'Ultralocrian']
 
 # Set up session state variables
 if 'show_notes' not in st.session_state:
@@ -23,6 +25,8 @@ if 'mode' not in st.session_state:
         st.session_state['mode'] = None
 if 'diatonic_scale' not in st.session_state:
     st.session_state['diatonic_scale'] = False
+if 'harmonic_minor_scale' not in st.session_state:
+    st.session_state['harmonic_minor_scale'] = False
 if 'chord_list' not in st.session_state:
     st.session_state.chord_list = []
 if 'recording' not in st.session_state:
@@ -101,6 +105,8 @@ def get_roman_numerals(intervals):
             result.append(roman_numerals[i].lower())
         elif interval == [0, 3, 6]:
             result.append(roman_numerals[i].lower()+"°")
+        elif interval == [0, 4, 8]:
+            result.append(roman_numerals[i]+"+")
         else:
             result.append(f"Unknown({interval})")  # For unsupported intervals
 
@@ -110,21 +116,25 @@ def get_roman_numerals(intervals):
 ###Test function input([C,E,G]) output: [[x,y], .... ] where [x,y]=='C' or 'E' or 'G'
 def getHighlightedNotes(triad_chromatic):
     indices = []
-    for note in triad_chromatic:
+    for i,note in enumerate(triad_chromatic):
         for x, row in enumerate(fretboard_notes):
             for y, value in enumerate(row):
                 if value == note:
-                    indices.append([x,y])
-    indices = [[y,x] for x, y in indices]
+                    indices.append([x,y,i])
+    indices = [[y,x,i] for x, y, i in indices]
     return indices
 
 
 
 ###Test function input(root,mode)
-def createMode(root,mode):
+def createMode(root,mode,modes):
     mode_number = modes.index(mode)
     ## Here diationic_intervals and %7 will change to be more general
-    mode_interval_L = [diatonic_intervals[(mode_number+i)%7] for i in range(7)]     # permutation of ['W','W','H','W','W','W','H']
+    if modes == modes_diatonic:
+        mode_interval_L = [diatonic_intervals[(mode_number+i)%7] for i in range(7)]     # permutation of ['W','W','H','W','W','W','H']
+    elif modes == modes_harmonic_minor:
+        mode_interval_L = [harmonic_minor_intervals[(mode_number+i)%7] for i in range(7)]
+    
     mode_interval_num = [                                                           # above in [2,2,1,2,2,2,1]
     2 if interval == 'W' else 1 if interval == 'H' else 3 if interval == 'WH' else None
     for interval in mode_interval_L
@@ -145,8 +155,6 @@ def createMode(root,mode):
     roman_numerals = get_roman_numerals(allowed_chords_num)
     print(roman_numerals)
     return scale, mode_interval_L, mode_interval_num, allowed_chords, allowed_chords_num, roman_numerals    #return [C,D,E,F,G,A,B],[W,W,H,W,W,W,H],[2,2,1,2,2,2,1],[[C,E,G],...],[[0,4,7],...]
-
-#createMode("F","Phrygian")
 
 
 # Using containers for vertical organization
@@ -184,12 +192,24 @@ with pick_scale:
         if st.button("Diatonic Scales"): #so far only diatonic scales
             st.session_state['diatonic_scale'] = not st.session_state['diatonic_scale']
         if st.session_state['diatonic_scale']:
-            for mode in modes: 
+            for mode in modes_diatonic : 
                 if st.button(mode):#, key=f"mode_{mode}"):
                     st.session_state['mode'] = mode
                     st.session_state['chord_type'] = None
             if st.session_state['mode']:
                 st.write("mode is:", st.session_state['mode'])
+    with st.container():
+        if st.button("Harmonic Minor Scales"): #so far only diatonic scales
+            st.session_state['harmonic_minor_scale'] = not st.session_state['harmonic_minor_scale']
+        if st.session_state['harmonic_minor_scale']:
+            for mode in modes_harmonic_minor : 
+                if st.button(mode):#, key=f"mode_{mode}"):
+                    st.session_state['mode'] = mode
+                    st.session_state['chord_type'] = None
+            if st.session_state['mode']:
+                st.write("mode is:", st.session_state['mode'])
+        else:
+            pass #here bugfix for ValueError: 'Phrygian' is not in list
 
 #print(st.session_state)
 with info:
@@ -204,33 +224,42 @@ with info:
                 pass
 
     with st.container():
-        if st.session_state['root'] and st.session_state['mode'] and st.session_state['diatonic_scale']:
-            scale, mode_interval_L, mode_interval_num, allowed_chords, allowed_chords_num, roman_numerals = createMode(st.session_state['root'],st.session_state['mode'])
-            st.header(f"{st.session_state['root']} {st.session_state['mode']}")
+        if st.session_state['root'] and st.session_state['mode']:
+            scale = []
+            allowed_chords = []
+            allowed_chords_num = []
+
+            if st.session_state['diatonic_scale']:
+                scale, mode_interval_L, mode_interval_num, allowed_chords, allowed_chords_num, roman_numerals = createMode(st.session_state['root'],st.session_state['mode'],modes_diatonic)
+            elif st.session_state['harmonic_minor_scale']:
+                scale, mode_interval_L, mode_interval_num, allowed_chords, allowed_chords_num, roman_numerals = createMode(st.session_state['root'],st.session_state['mode'],modes_harmonic_minor)
+            
+            if st.session_state['diatonic_scale'] or st.session_state['harmonic_minor_scale']:
+                st.header(f"{st.session_state['root']} {st.session_state['mode']}")
             #st.subheader('Interval Pattern')
             #st.caption(" - ".join(mode_interval_L))
-            st.subheader("Notes in scale")
-            st.caption(" - ".join(scale))
-            st.subheader("Allowed Chords")
-            for i, chord in enumerate(allowed_chords):
-                button_label = f"{roman_numerals[i]}: {','.join(chord)}"
-                if st.button(button_label,key=f"chord_{i}"):
-                    if st.session_state.recording:
-                        st.session_state.chord_list.append(Chord(chord[0], allowed_chords_num[i]))
-                        st.success(f"Added chord: {chord[0]} {allowed_chords_num[i]}")
-                    else:
-                        st.session_state.chord_list = [] #reset list
-                        addChord(chord[0], allowed_chords_num[i])
+                st.subheader("Notes in scale")
+                st.caption(" - ".join(scale))
+                st.subheader("Allowed Chords")
+                for i, chord in enumerate(allowed_chords):
+                    button_label = f"{roman_numerals[i]}: {','.join(chord)}"
+                    if st.button(button_label,key=f"chord_{i}"):
+                        if st.session_state.recording:
+                            st.session_state.chord_list.append(Chord(chord[0], allowed_chords_num[i]))
+                            st.success(f"Added chord: {chord[0]} {allowed_chords_num[i]}")
+                        else:
+                            st.session_state.chord_list = [] #reset list
+                            addChord(chord[0], allowed_chords_num[i])
 
-            if st.button("Generate Chord Progression"):
-                if not st.session_state.recording:
-                    st.session_state.recording = True
-                    st.session_state.chord_list = []
-                    st.success("Select from the allowed chords to create your Chord Progression")
-                else:
-                    st.session_state.recording = False
-                    st.session_state.chord_list = []
-                    st.success("Chord progression cleared!")
+                if st.button("Generate Chord Progression"):
+                    if not st.session_state.recording:
+                        st.session_state.recording = True
+                        st.session_state.chord_list = []
+                        st.success("Select from the allowed chords to create your Chord Progression")
+                    else:
+                        st.session_state.recording = False
+                        st.session_state.chord_list = []
+                        st.success("Chord progression cleared!")
             
             # Display the chord progression
             if st.session_state.recording:

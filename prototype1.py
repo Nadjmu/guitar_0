@@ -3,6 +3,7 @@ import streamlit as st
 from fretboard import draw_fretboard
 from io import BytesIO
 import numpy as np 
+import music_theory
 
 st.set_page_config(layout="wide")
 
@@ -63,6 +64,7 @@ def createFretboardNotes():
     return fretboard_notes
 
 fretboard_notes = createFretboardNotes()
+print(fretboard_notes)
 ###helper functions###
 def save_plot_as_file(fig, file_format="png"):
     buffer = BytesIO()

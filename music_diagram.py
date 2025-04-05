@@ -3,14 +3,13 @@ from matplotlib import use
 #use('WebAgg')
 import numpy as np
 import matplotlib.image as mpimg
+from music_theory import all_notes
 
 # Mapping of musical notes to y-axis positions (approximate for a staff)
-note_positions = {
-    "C0": -3.5, "Db": -0.5, "D0": -0.5, "Eb": 0, "E0": 0, "F0": 6.5,
-    "Gb": 0.5, "G0": 1.0, "Ab": 2, "A0": 2.5, "Bb": 3, "B0": 3.5, "C1": 4
-}
+note_positions = {key: value[1] for key, value in all_notes.items()}
 
 def draw_music_diagram(notes, clef_image_path):
+    sharp = True
     fig, ax = plt.subplots(figsize=(6, 3))
     diagram_length = 10
     # Draw staff lines
@@ -23,13 +22,22 @@ def draw_music_diagram(notes, clef_image_path):
     
     # Plot quarter notes at discrete x positions
     x_positions = np.linspace(1, len(notes), len(notes))
-    print(x_positions)
-    note_size = 150  # Adjusted for proper size relative to staff
+    note_size = 125  # Adjusted for proper size relative to staff
     for x_o, note in zip(x_positions, notes):
         if note in note_positions:
             y = note_positions[note]
-            x = 1+ (x_o-1)*diagram_length/(len(notes)-1)*0.35
-            print(x)
+            if len(notes)==1:
+                x = 1
+            else: 
+                x = 1+ (x_o-1)*diagram_length/(len(notes)-1)*0.35
+
+            if 'b' in note:
+                if sharp:
+                    y = y-0.5
+                    ax.text(x - 0.28, y-0.2, '#', fontsize=25, ha='center', va='center', color='black')
+                else:
+                    ax.text(x - 0.2, y, '♭', fontsize=20, ha='center', va='center', color='black')
+
             ax.scatter(x, y, color='black', s=note_size, marker='o')  # Larger note head
             ax.plot([x + 0.13, x + 0.13], [y, y + 3], color='black', linewidth=1.5)  # Adjusted Stem
             if y < -0.5:
@@ -55,7 +63,7 @@ def draw_music_diagram(notes, clef_image_path):
     return fig
 
 # Define notes
-notes = ["C0", "E0", "F0"]
+notes = ["C3", "Db3", "F4","F2"]
 clef_image_path = "clef.png"  # Path to uploaded clef image
 
 # Plot the music diagram

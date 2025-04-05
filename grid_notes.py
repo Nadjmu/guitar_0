@@ -26,14 +26,16 @@ def ChangeButtonColour(widget_label, prsd_status):
     components.html(f"{htmlstr}", height=0, width=0)
 
 def ChkBtnStatusAndAssignColour():
-    for i in range(len(all_notes)):
-        ChangeButtonColour(all_notes[i], st.session_state.button_states[all_notes[i]])
+    list_notes_key = list(all_notes.keys())
+    for i in range(len(list_notes_key)):
+        #print(list(all_notes.keys()))
+        ChangeButtonColour(list_notes_key[i], st.session_state.button_states[list_notes_key[i]])
 
 def btn_pressed_callback(button_key):
     st.session_state.button_states[button_key] = not st.session_state.button_states[button_key]
 
 for i in range(12):
-    row_cols = st.columns([1.8, 1.8, 10, 10])
+    row_cols = st.columns([2, 2, 2, 15])
     for j in range(3):
         with row_cols[j]:
             note = chromatic_scale[(4 + i) % 12]
@@ -44,6 +46,6 @@ for i in range(12):
                 st.session_state.button_states[button_key] = False
                 
             # Create button with dynamic class
-            button = st.button(button_key, key=button_key,help=button_key, on_click=btn_pressed_callback, args=(button_key,))
+            button = st.button(button_key, key=button_key, on_click=btn_pressed_callback, args=(button_key,))
                 
 ChkBtnStatusAndAssignColour()

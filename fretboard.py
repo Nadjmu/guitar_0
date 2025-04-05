@@ -1,9 +1,29 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Circle, Ellipse
+from music_theory import string_notes
+notes_color = [
+    # Original reds (slightly adjusted for better contrast on gold)
+    (0.65, 0.10, 0.18),    # Deep burgundy
+    (0.72, 0.18, 0.26),    # Rich red
+    (0.78, 0.25, 0.32),    # Medium red
+    
+    # Darker variations that contrast well with gold
+    (0.58, 0.08, 0.15),    # Very deep burgundy
+    (0.68, 0.12, 0.20),    # Dark wine
+    (0.75, 0.15, 0.25),    # Dark red
+    
+    # Warmer, slightly desaturated variations
+    (0.70, 0.20, 0.22),    # Reddish brown
+    (0.72, 0.22, 0.24),    # Warm burgundy
+    (0.74, 0.24, 0.26),    # Soft red
+    
+    # Lighter variations that maintain contrast
+    (0.76, 0.26, 0.30),    # Medium-light red
+    (0.80, 0.30, 0.34),    # Light red
+    (0.82, 0.32, 0.36)     # Very light red
+]
 
-notes_color = [(0.627, 0.078, 0.157),(0.727, 0.178, 0.257),(0.827, 0.278, 0.357)]
-
-def draw_fretboard(show_notes=True, chord=[[0,0]]):
+def draw_fretboard(show_notes=True, highlighted_notes=[[0,0]]): #notes is an array that gives the coordinates on the freboard of the notes
     chromatic_scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'bB', 'B']
     
     fig, ax = plt.subplots(figsize=(10, 1.5), facecolor='black')  # Adjust size to fit your layout
@@ -26,9 +46,9 @@ def draw_fretboard(show_notes=True, chord=[[0,0]]):
 
     # Optionally add notes
     if show_notes:
-        notes = ['E', 'A', 'D', 'G', 'B', 'E']  # Open string notes for standard tuning
+        #notes = ['E', 'A', 'D', 'G', 'B', 'E']  # Open string notes for standard tuning
         for string in range(6):
-            start_note = notes[string]
+            start_note = string_notes[string]
             start_index = chromatic_scale.index(start_note)
 
             for fret in range(num_frets + 1):
@@ -36,7 +56,7 @@ def draw_fretboard(show_notes=True, chord=[[0,0]]):
                 note = chromatic_scale[note_index]    
                 ax.text(fret-0.2, string, note, color='white', ha='center', va='center', fontweight='bold', alpha=0.75)
     
-    highlighted_notes = chord
+    print("incoming: ",highlighted_notes)
     for highlighted_note in highlighted_notes:
         # Add the rectangle patch to highlight the segment
         highlight_fret = highlighted_note[0]

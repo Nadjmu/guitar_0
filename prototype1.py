@@ -158,7 +158,7 @@ def createMode(root,mode,modes):
     print(roman_numerals)
     return scale, mode_interval_L, mode_interval_num, allowed_chords, allowed_chords_num, roman_numerals    #return [C,D,E,F,G,A,B],[W,W,H,W,W,W,H],[2,2,1,2,2,2,1],[[C,E,G],...],[[0,4,7],...]
 
-
+##################FRONT END *******************************
 # Using containers for vertical organization
 intro_container = st.container()
 with intro_container:
@@ -180,7 +180,7 @@ with root:
             st.write("root is:", st.session_state['root'])
     
 with pick_scale:
-    with st.container():
+    with st.container():            #Pick Chord Types
         st.header("Chord Types")
         for chord in chord_type:
             if st.button(chord):#, key=f"chord_{chord}"):
@@ -189,7 +189,7 @@ with pick_scale:
         if st.session_state['chord_type']:
             st.write("chord is:", st.session_state['chord_type'])
     
-    with st.container():
+    with st.container():            #Pick Diatonic Scale
         st.header("Scale")
         if st.button("Diatonic Scales"): #so far only diatonic scales
             st.session_state['diatonic_scale'] = not st.session_state['diatonic_scale']
@@ -200,7 +200,7 @@ with pick_scale:
                     st.session_state['chord_type'] = None
             if st.session_state['mode']:
                 st.write("mode is:", st.session_state['mode'])
-    with st.container():
+    with st.container():            #Pick Harmonic Minor Scale
         if st.button("Harmonic Minor Scales"): #so far only diatonic scales
             st.session_state['harmonic_minor_scale'] = not st.session_state['harmonic_minor_scale']
         if st.session_state['harmonic_minor_scale']:
@@ -298,7 +298,7 @@ with fretboard_col:
             for displayed_chord in st.session_state.chord_list:
                 triad_chromatic = getTriadChromatic(displayed_chord.root_note, displayed_chord.interval)
                 highlighted_notes = getHighlightedNotes(triad_chromatic)
-                fig = draw_fretboard(show_notes=st.session_state.show_notes, chord = highlighted_notes)
+                fig = draw_fretboard(show_notes=st.session_state.show_notes, highlighted_notes = highlighted_notes)
                 figures.append(fig)
 
             for i,fig in enumerate(figures):
@@ -315,7 +315,7 @@ with options_expander:
 # Footer or additional info section
 footer_container = st.container()
 with footer_container:
-    st.write("Created by Your Name - 2024")
+    st.write("Created by Nadjmu - 2024")
     st.write("Additional information, links, or tutorials can be placed here.")
 
 """

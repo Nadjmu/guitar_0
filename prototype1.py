@@ -1,4 +1,3 @@
-from PIL import Image, ImageDraw
 import streamlit as st
 from fretboard import draw_fretboard
 from io import BytesIO

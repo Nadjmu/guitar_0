@@ -56,7 +56,6 @@ def draw_fretboard(show_notes=True, highlighted_notes=[[0,0]]): #notes is an arr
                 note = chromatic_scale[note_index]    
                 ax.text(fret-0.2, string, note, color='white', ha='center', va='center', fontweight='bold', alpha=0.75)
     
-    print("incoming: ",highlighted_notes)
     for highlighted_note in highlighted_notes:
         # Add the rectangle patch to highlight the segment
         highlight_fret = highlighted_note[0]

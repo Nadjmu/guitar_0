@@ -9,7 +9,7 @@ from music_theory import all_notes
 note_positions = {key: value[1] for key, value in all_notes.items()}
 
 def draw_music_diagram(notes, clef_image_path):
-    sharp = True
+    sharp = False
     fig, ax = plt.subplots(figsize=(6, 3))
     diagram_length = 10
     # Draw staff lines

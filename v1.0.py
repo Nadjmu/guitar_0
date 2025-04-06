@@ -76,26 +76,38 @@ def keyToCoordinates(notes=["E4"]):
     print(coordinates)
     return coordinates
 
-keys_col, music_diagram_col, fretboard_col = st.columns([2,5,9])
+intro_container = st.container()
+with intro_container:
+    st.title("🪕 Guitar_0")
+    st.write("This application serves as an interactive handbook for anyone trying to learn how to improvise. Pick a scale, a root note and the mode you want to play.")
+    st.write("You will see all the possible chords which are allowed. Furthermore you can see possible and commonly used chord progressions")
+    st.write("The visual guitar shows you where you have to land your fingers on the fretboard. It is particularly useful for people trying to switch from the piano to the guitar.\n \n")
 
-with keys_col: 
-    with st.container():
-        for i in range(12):
-            row_cols = st.columns([2, 2, 2])
-            for j in range(3):
-                with row_cols[j]:
-                    note = chromatic_scale[(4 + i) % 12]
-                    new_octave = (4+i)//12
-                    button_key = f"{note}{j+new_octave+2}"
-                        
-                    # Initialize state if not exists
-                    if button_key not in st.session_state.button_states:
-                        st.session_state.button_states[button_key] = {'state': False, 'order': None}
-                        
-                    # Create button with dynamic class
-                    button = st.button(button_key, key=button_key, on_click=btn_pressed_callback, args=(button_key,))
-                
-        ChkBtnStatusAndAssignColour()
+
+key_1_col, key_2_col, key_3_col, music_diagram_col, fretboard_col = st.columns([1,1,1,8,13])
+for i in range(12):
+    for j in range(3):
+        note = chromatic_scale[(4 + i) % 12]
+        new_octave = (4+i)//12
+        button_key = f"{note}{j+new_octave+2}"
+        # Initialize state if not exists
+        if button_key not in st.session_state.button_states:
+            st.session_state.button_states[button_key] = {'state': False, 'order': None}
+        if j==0:
+            with key_1_col:
+                # Create button with dynamic class
+                button = st.button(button_key, key=button_key, on_click=btn_pressed_callback, args=(button_key,))
+        elif j==1:
+            with key_2_col:
+                # Create button with dynamic class
+                button = st.button(button_key, key=button_key, on_click=btn_pressed_callback, args=(button_key,))
+        elif j==2:
+            with key_3_col:
+                # Create button with dynamic class
+                button = st.button(button_key, key=button_key, on_click=btn_pressed_callback, args=(button_key,))
+ChkBtnStatusAndAssignColour()
+
+
 
 with music_diagram_col:
     with st.container():

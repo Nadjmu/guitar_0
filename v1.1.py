@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
-from music_theory import chromatic_scale, all_notes, chord_type, chord_type_abbr
+from music_theory import chromatic_scale, all_notes, chord_type, chord_type_abbr, scale_type
 from music_diagram import draw_music_diagram
 from fretboard import draw_fretboard
 from io import BytesIO
@@ -16,8 +16,11 @@ if 'button_press_order_notes_tab' not in st.session_state:
 if 'button_states_chords_tab' not in st.session_state:
     st.session_state.button_states_chords_tab = {}
 
-if 'chord_list' not in st.session_state:
-    st.session_state.chord_list = []
+if 'button_states_scales_tab' not in st.session_state:
+    st.session_state.button_states_scales_tab = {}
+
+if 'chords_tab_chord_list' not in st.session_state:
+    st.session_state.chords_tab_chord_list = []
     
 unpressed_colour = "#FFFFFF"  # White
 pressed_colour = "#B0B0B0"    # Grey
@@ -91,7 +94,7 @@ class Chord:
 # Function to add a new Chord to the list
 def addChord(root, interval):
     new_chord = Chord(root, interval)
-    st.session_state.chord_list.append(new_chord)
+    st.session_state.chords_tab_chord_list.append(new_chord)
 
 
 ###Test function input(root, index_list) output: triad in chromatic scale e.g. [C,E,G]
@@ -166,13 +169,15 @@ def btn_pressed_callback_notes_tab(button_key): #NOT GlOBAL because of button_st
         if button_key in st.session_state.button_press_order_notes_tab:
             st.session_state.button_press_order_notes_tab.remove(button_key)
  
-def ChordsTabChkBtnStatusAndAssignColour():
-    list_root_key = ['CTR' + note for note in chromatic_scale]
-    for i in range(len(list_root_key)):
-        ChangeButtonColour(chromatic_scale[i],st.session_state.button_states_chords_tab[list_root_key[i]]['state'])
-    list_chordtype_key = ['CTT' + chord for chord in chord_type]
-    for i in range(len(list_chordtype_key)):
-        ChangeButtonColour(chord_type[i],st.session_state.button_states_chords_tab[list_chordtype_key[i]]['state'])
+def ChordsTabChkBtnStatusAndAssignColour(id = ""):
+    if id == 'R':
+        list_root_key = ['CTR' + note for note in chromatic_scale]
+        for i in range(len(list_root_key)):
+            ChangeButtonColour(chromatic_scale[i],st.session_state.button_states_chords_tab[list_root_key[i]]['state'])
+    elif id == 'T':
+        list_chordtype_key = ['CTT' + chord for chord in chord_type]
+        for i in range(len(list_chordtype_key)):
+            ChangeButtonColour(chord_type[i],st.session_state.button_states_chords_tab[list_chordtype_key[i]]['state'])
 
 def ChordsTabResetRootStatus(id = ""):
     list_root_key = ['CTR' + note for note in chromatic_scale]
@@ -193,7 +198,39 @@ def btn_pressed_callback_chords_tab(button_key):
         ChordsTabResetRootStatus(button_key[2])
         st.session_state.button_states_chords_tab[button_key]['state'] = not current_state
 
-def has_active_ctr_and_ctt():
+
+def ScalesTabChkBtnStatusAndAssignColour(id = ""):
+    if id == 'R':
+        list_root_key = ['STR' + note for note in chromatic_scale]
+        for i in range(len(list_root_key)):
+            ChangeButtonColour(chromatic_scale[i],st.session_state.button_states_scales_tab[list_root_key[i]]['state'])
+    elif id == 'T':
+        list_scaletype_key = ['STT' + type for type in scale_type]
+        for i in range(len(list_scaletype_key)):
+            ChangeButtonColour(scale_type[i],st.session_state.button_states_scales_tab[list_scaletype_key[i]]['state'])
+
+def ScalesTabResetRootStatus(id = ""):
+    list_root_key = ['STR' + note for note in chromatic_scale]
+    list_scaletype_key = ['STT' + scale for scale in scale_type]
+
+    if id == 'R':
+        for i in range(len(list_root_key)):
+            st.session_state.button_states_scales_tab[list_root_key[i]]['state'] = False
+    elif id=='T':
+        for i in range(len(list_scaletype_key)):
+            st.session_state.button_states_scales_tab[list_scaletype_key[i]]['state'] = False
+
+def btn_pressed_callback_scales_tab(button_key):
+    current_state = st.session_state.button_states_scales_tab[button_key]['state']
+    st.session_state.button_states_scales_tab[button_key]['state'] = not current_state
+    # Update press order if being activated
+    if not current_state:  # If was False and now True (being activated)
+        ScalesTabResetRootStatus(button_key[2])
+        st.session_state.button_states_scales_tab[button_key]['state'] = not current_state
+
+
+
+def has_active_ctr_and_ctt():      #Chords Tab
     # Check if the dictionary exists
     if 'button_states_chords_tab' not in st.session_state:
         return False
@@ -216,7 +253,7 @@ def has_active_ctr_and_ctt():
     
     return has_active_ctr and has_active_ctt
 
-def get_root_ctr_key(): #Output: C, D, E, ...
+def get_root_ctr_key(): #Output: C, D, E, ... #Chords Tab
     if 'button_states_chords_tab' not in st.session_state:
         return None
     
@@ -225,7 +262,7 @@ def get_root_ctr_key(): #Output: C, D, E, ...
             return key[3:]  # Returns the root
     return None
 
-def get_chordtype_ctr_key(): #Output: C, D, E, ...
+def get_chordtype_ctr_key(): #Output: C, D, E, ... #Chords Tab
     if 'button_states_chords_tab' not in st.session_state:
         return None
     
@@ -234,7 +271,7 @@ def get_chordtype_ctr_key(): #Output: C, D, E, ...
             return key[3:]  # Returns the root
     return None
 #######################################For fretboard##############
-def keyToCoordinates(notes=["E4"]):
+def keyToCoordinates(notes=["E4"]):     #Notes Tab
     coordinates = []
     for i, note in enumerate(notes):
         id_note = 1 + list(all_notes.keys()).index(note)
@@ -247,7 +284,7 @@ def keyToCoordinates(notes=["E4"]):
     print(coordinates)
     return coordinates
 
-def initNotesButtons():
+def initNotesButtons():     #Notes Tab
     for i in range(12):
         for j in range(3):
             note = chromatic_scale[(4 + i) % 12]
@@ -288,7 +325,7 @@ if selected == "Notes":
         st.write("You will see all the possible chords which are allowed. Furthermore you can see possible and commonly used chord progressions")
         st.write("The visual guitar shows you where you have to land your fingers on the fretboard. It is particularly useful for people trying to switch from the piano to the guitar.\n \n")
     
-    st.header("pick your note")
+    st.header("")
     key_1_col, key_2_col, key_3_col, music_diagram_col, fretboard_col = st.columns([1,1,1,8,13])
     initNotesButtons()   #initializes the buttons in the key_1_col - key_3_col
     NotesTabChkBtnStatusAndAssignColour()
@@ -336,7 +373,7 @@ elif selected == "Chords":
                     st.session_state.button_states_chords_tab[button_key] = {'state': False}
 
                 button = st.button(note, key=button_key, on_click=btn_pressed_callback_chords_tab, args=(button_key,))
-            ChordsTabChkBtnStatusAndAssignColour()
+            ChordsTabChkBtnStatusAndAssignColour("R")
 
     with type_col:
         with st.expander("Chord Type",expanded=False):
@@ -346,7 +383,7 @@ elif selected == "Chords":
                     st.session_state.button_states_chords_tab[button_key] = {'state': False}
                 
                 button = st.button(chord, key=button_key, on_click=btn_pressed_callback_chords_tab, args=(button_key,))
-            ChordsTabChkBtnStatusAndAssignColour()
+            ChordsTabChkBtnStatusAndAssignColour("T")
 
     with info_col:
         root = get_root_ctr_key()
@@ -355,7 +392,7 @@ elif selected == "Chords":
             interval_list = getIntervalList(root, chord_type_1)
             triad_chromatic = getTriadChromatic(root, interval_list)
             print("triad chromatic: ",triad_chromatic)
-            st.session_state.chord_list = [] #reset list
+            st.session_state.chords_tab_chord_list = [] #reset list
             addChord(root, interval_list)
             st.subheader(f"{root}{chord_type_abbr[chord_type.index(chord_type_1)]} ({triad_chromatic[0]} {triad_chromatic[1]} {triad_chromatic[2]})")
             # Get notes in activation order:
@@ -370,8 +407,8 @@ elif selected == "Chords":
         for i in range(3):
             st.write("")
         figures = []
-        if st.session_state.chord_list:
-            for displayed_chord in st.session_state.chord_list:
+        if st.session_state.chords_tab_chord_list:
+            for displayed_chord in st.session_state.chords_tab_chord_list:
                 triad_chromatic = getTriadChromatic(displayed_chord.root_note, displayed_chord.interval)
                 highlighted_notes = getHighlightedNotes(triad_chromatic)
                 fig = draw_fretboard(show_notes=True, highlighted_notes = highlighted_notes)
@@ -381,5 +418,33 @@ elif selected == "Chords":
                 st.pyplot(fig)
 
 elif selected == "Scales":
-    st.title("Settings")
-    st.write("Configure your settings here.")
+    st.title("Scales")
+    intro_container = st.container()
+    with intro_container:
+        st.title("🪕 Guitar_1")
+        st.write("This application serves as an interactive handbook for anyone trying to learn how to improvise. Pick a scale, a root note and the mode you want to play.")
+        st.write("You will see all the possible chords which are allowed. Furthermore you can see possible and commonly used chord progressions")
+        st.write("The visual guitar shows you where you have to land your fingers on the fretboard. It is particularly useful for people trying to switch from the piano to the guitar.\n \n")
+    
+     # Layout with left sidebar, main content, and right sidebar
+    root_col, type_col, info_col, fretboard_col = st.columns([2,3,5,13])  # Adjust the ratio as needed
+    
+    with root_col:
+        with st.expander("Root",expanded=False):
+            for note in chromatic_scale:
+                button_key = f"STR{note}" #stands for Chord Tab Root
+                if button_key not in st.session_state.button_states_scales_tab:
+                    st.session_state.button_states_scales_tab[button_key] = {'state': False}
+
+                button = st.button(note, key=button_key, on_click=btn_pressed_callback_scales_tab, args=(button_key,))
+            ScalesTabChkBtnStatusAndAssignColour("R")
+
+    with type_col:
+        with st.expander("Scales Type",expanded=False):
+            for scale in scale_type:
+                button_key = f"STT{scale}" #stands for Chord Tab Type
+                if button_key not in st.session_state.button_states_scales_tab:
+                    st.session_state.button_states_scales_tab[button_key] = {'state': False}
+                
+                button = st.button(scale, key=button_key, on_click=btn_pressed_callback_scales_tab, args=(button_key,))
+            ScalesTabChkBtnStatusAndAssignColour("T")            

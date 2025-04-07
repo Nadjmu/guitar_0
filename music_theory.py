@@ -13,3 +13,5 @@ harmonic_minor_intervals = ['W','H','W','W','H','WH','H']
 modes_harmonic_minor =['Harmonic Minor', 'Locrian', 'Ionian', 'Dorian', 'Phrygian Dominant', 'Lydian', 'Ultralocrian']
 # Standard tuning notes (strings 0-5)
 string_notes = ['E', 'A', 'D', 'G', 'B', 'E']
+
+scale_type = ["Diatonic", "Harmonic Minor"]

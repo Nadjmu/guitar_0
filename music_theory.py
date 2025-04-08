@@ -6,8 +6,10 @@ all_notes = {'E2': ['E',-3.5], 'F2':['F',-3.0], 'Gb2':['Gb',-2.5], 'G2':['G',-2.
 
 
 modes_diatonic = ['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Myxolodian', 'Aoelian', 'Locrian']
+
 chord_type = ['Major', 'Minor', 'Diminished', 'Augmented']
 chord_type_abbr = ['maj', 'min', 'dim', 'aug']
+
 diatonic_intervals = ['W','W','H','W','W','W','H']
 harmonic_minor_intervals = ['W','H','W','W','H','WH','H']
 modes_harmonic_minor =['Harmonic Minor', 'Locrian', 'Ionian', 'Dorian', 'Phrygian Dominant', 'Lydian', 'Ultralocrian']
@@ -15,3 +17,6 @@ modes_harmonic_minor =['Harmonic Minor', 'Locrian', 'Ionian', 'Dorian', 'Phrygia
 string_notes = ['E', 'A', 'D', 'G', 'B', 'E']
 
 scale_type = ["Diatonic", "Harmonic Minor"]
+intervals = [['W','W','H','W','W','W','H'],['W','H','W','W','H','WH','H']]
+modes = [['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Myxolodian', 'Aoelian', 'Locrian'], 
+         ['Harmonic Minor', 'Locrian 6', 'Ionian 5', 'Dorian 4', 'Phrygian Dominant', 'Lydian 2', 'Ultralocrian']]

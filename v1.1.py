@@ -442,15 +442,7 @@ with st.sidebar:
 
 # Main content area
 if selected == "Notes":
-    st.title("Notes")
-    intro_container = st.container()
-    with intro_container:
-        st.title("🪕 Guitar_0")
-        st.write("here you will learn about notes. There are 36 possible notes you can play on the fretboard up to the 12th fret")
-        st.write("This application serves as an interactive handbook for anyone trying to learn how to improvise. Pick a scale, a root note and the mode you want to play.")
-        st.write("You will see all the possible chords which are allowed. Furthermore you can see possible and commonly used chord progressions")
-        st.write("The visual guitar shows you where you have to land your fingers on the fretboard. It is particularly useful for people trying to switch from the piano to the guitar.\n \n")
-    
+    st.title("Notes 🪕 ")
     st.header("")
     key_1_col, key_2_col, key_3_col, music_diagram_col, fretboard_col = st.columns([1,1,1,8,13])
     initNotesButtons()   #initializes the buttons in the key_1_col - key_3_col
@@ -481,12 +473,6 @@ if selected == "Notes":
 
 elif selected == "Chords":
     st.title("Chords")
-    intro_container = st.container()
-    with intro_container:
-        st.title("🪕 Guitar_1")
-        st.write("This application serves as an interactive handbook for anyone trying to learn how to improvise. Pick a scale, a root note and the mode you want to play.")
-        st.write("You will see all the possible chords which are allowed. Furthermore you can see possible and commonly used chord progressions")
-        st.write("The visual guitar shows you where you have to land your fingers on the fretboard. It is particularly useful for people trying to switch from the piano to the guitar.\n \n")
     
     # Layout with left sidebar, main content, and right sidebar
     root_col, type_col, info_col, fretboard_col = st.columns([2,3,5,13])  # Adjust the ratio as needed
@@ -545,13 +531,6 @@ elif selected == "Chords":
 
 elif selected == "Scales":
     st.title("Scales")
-    intro_container = st.container()
-    with intro_container:
-        st.title("🪕 Guitar_1")
-        st.write("This application serves as an interactive handbook for anyone trying to learn how to improvise. Pick a scale, a root note and the mode you want to play.")
-        st.write("You will see all the possible chords which are allowed. Furthermore you can see possible and commonly used chord progressions")
-        st.write("The visual guitar shows you where you have to land your fingers on the fretboard. It is particularly useful for people trying to switch from the piano to the guitar.\n \n")
-    
      # Layout with left sidebar, main content, and right sidebar
     root_col, type_col, info_col, fretboard_col = st.columns([1,2,5,13])  # Adjust the ratio as needed
     

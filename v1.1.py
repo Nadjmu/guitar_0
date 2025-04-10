@@ -241,6 +241,7 @@ def btn_pressed_callback_scales_tab(button_key): #Scales
     st.session_state.button_states_scales_tab[button_key]['state'] = not current_state
     # Update press order if being activated
     if not current_state:  # If was False and now True (being activated)
+        st.session_state.scales_tab_chord_list = [] ###
         ScalesTabResetRootStatus(button_key[2])
         st.session_state.button_states_scales_tab[button_key]['state'] = not current_state
 

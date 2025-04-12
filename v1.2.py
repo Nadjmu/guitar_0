@@ -461,7 +461,7 @@ with st.sidebar:
 # Main content area
 if selected == "Notes":
     st.title("Notes 🪕 ")
-    st.header("This is the notes section")
+    st.write("This is the notes section")
     key_1_col, key_2_col, key_3_col, music_diagram_col, fretboard_col = st.columns([1,1,1,8,13])
     initNotesButtons()   #initializes the buttons in the key_1_col - key_3_col
     NotesTabChkBtnStatusAndAssignColour()

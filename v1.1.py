@@ -581,6 +581,7 @@ elif selected == "Scales":
             st.write(" - ".join(scale))
             notes_scales = [note+'3' for note in scale]
             figures = []
+            #st.button("▶", key="play_scale")
             fig = draw_music_diagram(notes_scales, clef_image_path)
             #figures.append(fig)
             st.pyplot(fig)

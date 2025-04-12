@@ -4,8 +4,14 @@ from music_theory import chromatic_scale, all_notes, chord_type, chord_type_abbr
 from music_diagram import draw_music_diagram
 from fretboard import draw_fretboard
 from io import BytesIO
+import time
+from pygame import mixer
+import os
 
 st.set_page_config(layout="wide")  # Must be the first Streamlit command
+
+mixer.init()
+
 # Initialize session state
 if "button_states_notes_tab" not in st.session_state:
     st.session_state.button_states_notes_tab = {} # {button_key: {'state': False, 'order': None}}
@@ -15,6 +21,14 @@ if 'button_press_order_notes_tab' not in st.session_state:
 
 if 'button_states_chords_tab' not in st.session_state:
     st.session_state.button_states_chords_tab = {}
+# Initialize session state
+if 'chords_expander_label' not in st.session_state:
+    st.session_state.chords_expander_label = "Root"
+
+if 'scales_expander_label' not in st.session_state:
+    st.session_state.scales_expander_label = "Root"
+
+
 
 if 'button_states_scales_tab' not in st.session_state:
     st.session_state.button_states_scales_tab = {}
@@ -200,13 +214,15 @@ def ChordsTabResetRootStatus(id = ""): #Chords
             st.session_state.button_states_chords_tab[list_chordtype_key[i]]['state'] = False
 
 def btn_pressed_callback_chords_tab(button_key): #Chords
+    if (button_key[2]=='R'):
+        st.session_state.chords_expander_label = button_key[3:]
     current_state = st.session_state.button_states_chords_tab[button_key]['state']
     st.session_state.button_states_chords_tab[button_key]['state'] = not current_state
     # Update press order if being activated
     if not current_state:  # If was False and now True (being activated)
         ChordsTabResetRootStatus(button_key[2])
         st.session_state.button_states_chords_tab[button_key]['state'] = not current_state
-
+    
 
 def ScalesTabChkBtnStatusAndAssignColour(id = ""): #Scales
     if id == 'R':
@@ -237,6 +253,8 @@ def ScalesTabResetRootStatus(id = ""): #Scales
             st.session_state.button_states_scales_tab[list_harmonicminor_modetype_key[i]]['state'] = False
 
 def btn_pressed_callback_scales_tab(button_key): #Scales
+    if (button_key[2]=='R'):
+        st.session_state.scales_expander_label = button_key[3:]
     current_state = st.session_state.button_states_scales_tab[button_key]['state']
     st.session_state.button_states_scales_tab[button_key]['state'] = not current_state
     # Update press order if being activated
@@ -443,7 +461,7 @@ with st.sidebar:
 # Main content area
 if selected == "Notes":
     st.title("Notes 🪕 ")
-    st.header("")
+    st.header("This is the notes section")
     key_1_col, key_2_col, key_3_col, music_diagram_col, fretboard_col = st.columns([1,1,1,8,13])
     initNotesButtons()   #initializes the buttons in the key_1_col - key_3_col
     NotesTabChkBtnStatusAndAssignColour()
@@ -456,13 +474,26 @@ if selected == "Notes":
             # Get notes_notes_tab in activation order:
             notes_notes_tab = [key for key in st.session_state.button_press_order_notes_tab if st.session_state.button_states_notes_tab[key]['state'] is True]
             figures = []
+            # Play the MP3 file when the button is clicked
+            # Play a sequence of MP3 files when the button is clicked
+            if st.button("▶ ", key="play_notes_sequence"):
+                audio_files = [f"audio_mp3/{note}.mp3" for note in notes_notes_tab]  # List of MP3 file paths
+                for audio_file_path in audio_files:
+                    if os.path.exists(audio_file_path):  # Check if the file exists
+                        #st.write(f"Now playing: {audio_file_path.split('/')[-1]}")  # Display the file being played
+                        mixer.music.load(audio_file_path)  # Load the MP3 file
+                        mixer.music.play()  # Play the MP3 file
+
+                        # Wait for the current file to finish playing
+                        while mixer.music.get_busy():
+                            time.sleep(0.1)
             fig = draw_music_diagram(notes_notes_tab, clef_image_path)
             figures.append(fig)
             st.pyplot(fig)
     
     with fretboard_col:
         with st.container():
-            for i in range(3):
+            for i in range(6):
                 st.write("")
 
             coordinates_notes_notes_tab = keyToCoordinates(notes_notes_tab)
@@ -473,19 +504,40 @@ if selected == "Notes":
 
 elif selected == "Chords":
     st.title("Chords")
-    
+    st.write("This is the chords section")
+    with st.container():
+        st.markdown("""
+    <hr style="border: none; height: 2px; background-color: #ccc; margin: 0; padding: 0;">
+""", unsafe_allow_html=True)
+        des_col, root_col, fill_col = st.columns([1,2,15])
+        with des_col:
+            st.subheader("Root: ")
+        with root_col:
+            # Add custom CSS for the "Root" expander
+            st.markdown("""
+                <style>
+                /* Target the expander with the label "Root" */
+                div[aria-expanded="false"] > div:first-child {
+                    font-size: 20px; /* Adjust font size */
+                    font-weight: bold; /* Make it bold */
+                    padding: 10px; /* Add padding */
+                    background-color: #f0f2f6; /* Background color */
+                    border-radius: 10px; /* Rounded corners */
+                }
+                </style>
+            """, unsafe_allow_html=True)
+            with st.expander(st.session_state.chords_expander_label,expanded=False):
+                for note in chromatic_scale:
+                    button_key = f"CTR{note}"
+                    if button_key not in st.session_state.button_states_chords_tab:
+                        st.session_state.button_states_chords_tab[button_key] = {'state': False}
+                    
+                    button = st.button(note, key=button_key, on_click=btn_pressed_callback_chords_tab, args=(button_key,))
+        st.markdown("""
+    <hr style="border: none; height: 2px; background-color: #ccc; margin: 0; padding: 0;">
+""", unsafe_allow_html=True)
     # Layout with left sidebar, main content, and right sidebar
-    root_col, type_col, info_col, fretboard_col = st.columns([2,3,5,13])  # Adjust the ratio as needed
-
-    with root_col:
-        with st.expander("Root",expanded=False):
-            for note in chromatic_scale:
-                button_key = f"CTR{note}" #stands for Chord Tab Root
-                if button_key not in st.session_state.button_states_chords_tab:
-                    st.session_state.button_states_chords_tab[button_key] = {'state': False}
-
-                button = st.button(note, key=button_key, on_click=btn_pressed_callback_chords_tab, args=(button_key,))
-            ChordsTabChkBtnStatusAndAssignColour("R")
+    type_col, info_col, fretboard_col = st.columns([3,5,13])  # Adjust the ratio as needed
 
     with type_col:
         with st.expander("Chord Type",expanded=False):
@@ -508,9 +560,20 @@ elif selected == "Chords":
             addChordChordsTab(root, interval_list)
             st.subheader(f"{root}{chord_type_abbr[chord_type.index(chord_type_1)]} ({triad_chromatic[0]} {triad_chromatic[1]} {triad_chromatic[2]})")
             # Get notes in activation order:
-            notes = [note+'3' for note in triad_chromatic]
+            notes = [note + ('3' if chromatic_scale.index(note) >= chromatic_scale.index(triad_chromatic[0]) else '4')
+    for note in triad_chromatic]
             #print("notes:  ",notes)
             figures = []
+            if st.button("▶ ", key="play_scales_sequence"):
+                audio_files = [f"audio_mp3/{note}.mp3" for note in notes]  # List of MP3 file paths
+                for audio_file_path in audio_files:
+                    #st.write(f"Now playing: {audio_file_path.split('/')[-1]}")  # Display the file being played
+                    mixer.music.load(audio_file_path)  # Load the MP3 file
+                    mixer.music.play()  # Play the MP3 file
+
+                    # Wait for the current file to finish playing
+                    while mixer.music.get_busy():
+                        time.sleep(0.1)
             fig = draw_music_diagram(notes, clef_image_path)
             figures.append(fig)
             st.pyplot(fig)
@@ -531,20 +594,44 @@ elif selected == "Chords":
 
 elif selected == "Scales":
     st.title("Scales")
+    st.write("This is the scales section")
+    with st.container():
+        st.markdown("""
+    <hr style="border: none; height: 2px; background-color: #ccc; margin: 0; padding: 0;">
+""", unsafe_allow_html=True)
+        des_col, root_col, fill_col = st.columns([1,2,15])
+        with des_col:
+            st.subheader("Root: ")
+        with root_col:
+            # Add custom CSS for the "Root" expander
+            st.markdown("""
+                <style>
+                /* Target the expander with the label "Root" */
+                div[aria-expanded="false"] > div:first-child {
+                    font-size: 20px; /* Adjust font size */
+                    font-weight: bold; /* Make it bold */
+                    padding: 10px; /* Add padding */
+                    background-color: #f0f2f6; /* Background color */
+                    border-radius: 10px; /* Rounded corners */
+                }
+                </style>
+            """, unsafe_allow_html=True)
+            with st.expander(st.session_state.scales_expander_label,expanded=False):
+                for note in chromatic_scale:
+                    button_key = f"STR{note}"
+                    if button_key not in st.session_state.button_states_scales_tab:
+                        st.session_state.button_states_scales_tab[button_key] = {'state': False}
+                    
+                    button = st.button(note, key=button_key, on_click=btn_pressed_callback_scales_tab, args=(button_key,))
+        st.markdown("""
+    <hr style="border: none; height: 2px; background-color: #ccc; margin: 0; padding: 0;">
+""", unsafe_allow_html=True)
+    # Layout with left sidebar, main content, and right sidebar
      # Layout with left sidebar, main content, and right sidebar
-    root_col, type_col, info_col, fretboard_col = st.columns([1,2,5,13])  # Adjust the ratio as needed
+    type_col, info_col, fretboard_col = st.columns([2,5,13])  # Adjust the ratio as needed
     
-    with root_col:
-        with st.expander("Root",expanded=False):
-            for note in chromatic_scale:
-                button_key = f"STR{note}" #stands for Chord Tab Root
-                if button_key not in st.session_state.button_states_scales_tab:
-                    st.session_state.button_states_scales_tab[button_key] = {'state': False}
-
-                button = st.button(note, key=button_key, on_click=btn_pressed_callback_scales_tab, args=(button_key,))
-            ScalesTabChkBtnStatusAndAssignColour("R")
-
     with type_col:
+        st.subheader("Scale Type: ")
         with st.expander("Diatonic", expanded=False):
             for mode in modes[0]:
                 button_key = f"STMD{mode}" #stands for Scales Tab Mode Diatonic
@@ -574,16 +661,29 @@ elif selected == "Scales":
             st.subheader(root+" "+scale_type_1+" "+mode_1)
             if scale_type_1=="Diatonic":
                 scale, mode_interval_L, mode_interval_num, allowed_chords, allowed_chords_num, roman_numerals = createMode(root,mode_1,modes[0])
-                st.subheader("")
             elif scale_type_1=="Harmonic Minor":
                 scale, mode_interval_L, mode_interval_num, allowed_chords, allowed_chords_num, roman_numerals = createMode(root,mode_1,modes[1])
             
             st.write(" - ".join(scale))
-            notes_scales = [note+'3' for note in scale]
+            notes_scales = [
+    note + ('3' if chromatic_scale.index(note) >= chromatic_scale.index(scale[0]) else '4')
+    for note in scale
+]
+            notes_scales.append(scale[0]+'4')
             figures = []
-            #st.button("▶", key="play_scale")
+            # Play the MP3 file when the button is clicked
+            # Play a sequence of MP3 files when the button is clicked
+            if st.button("▶ ", key="play_scales_sequence"):
+                audio_files = [f"audio_mp3/{note}.mp3" for note in notes_scales]  # List of MP3 file paths
+                for audio_file_path in audio_files:
+                    #st.write(f"Now playing: {audio_file_path.split('/')[-1]}")  # Display the file being played
+                    mixer.music.load(audio_file_path)  # Load the MP3 file
+                    mixer.music.play()  # Play the MP3 file
+
+                    # Wait for the current file to finish playing
+                    while mixer.music.get_busy():
+                        time.sleep(0.1)
             fig = draw_music_diagram(notes_scales, clef_image_path)
-            #figures.append(fig)
             st.pyplot(fig)
             ####Allowed Chords
             st.subheader("Allowed Chords")
@@ -598,8 +698,20 @@ elif selected == "Scales":
                 
                 st.button(button_label, key=button_key, on_click=btn_pressed_callback_allowed_chords, args=(button_key,chord_obj,))
                 if st.session_state.button_states_scales_tab[button_key]['state']:
-                    triad_chromatic = [note+'3' for note in getTriadChromatic(chord_obj.root_note, chord_obj.interval)]
-                    fig1 = draw_music_diagram(triad_chromatic, clef_image_path)
+                    triad_chromatic = getTriadChromatic(chord_obj.root_note, chord_obj.interval)
+                    notes = [note + ('3' if chromatic_scale.index(note) >= chromatic_scale.index(triad_chromatic[0]) else '4')
+    for note in triad_chromatic]
+                    if st.button("▶ ", key=f"play_allowed_chord{i}"):
+                        audio_files = [f"audio_mp3/{note}.mp3" for note in notes]  # List of MP3 file paths
+                        for audio_file_path in audio_files:
+                            #st.write(f"Now playing: {audio_file_path.split('/')[-1]}")  # Display the file being played
+                            mixer.music.load(audio_file_path)  # Load the MP3 file
+                            mixer.music.play()  # Play the MP3 file
+
+                            # Wait for the current file to finish playing
+                            while mixer.music.get_busy():
+                                time.sleep(0.1)
+                    fig1 = draw_music_diagram(notes, clef_image_path)
                     st.pyplot(fig1)
             
             AllowedChordsChtBtnStatusAndAssignColour(len(allowed_chords),button_labels)
@@ -607,7 +719,7 @@ elif selected == "Scales":
     
 
     with fretboard_col:
-        for i in range(8):
+        for i in range(13):
             st.write("")
 
         if has_active_str_and_stm():

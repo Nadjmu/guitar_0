@@ -5,12 +5,14 @@ from music_diagram import draw_music_diagram
 from fretboard import draw_fretboard
 from io import BytesIO
 import time
-from pygame import mixer
 import os
+import librosa
+import soundfile as sf
+import tempfile
+import numpy as np
 
 st.set_page_config(layout="wide")  # Must be the first Streamlit command
 
-mixer.init()
 
 # Initialize session state
 if "button_states_notes_tab" not in st.session_state:
@@ -45,6 +47,9 @@ pressed_colour = "#B0B0B0"    # Grey
 pressed_text_colour = "white"
 unpressed_text_colour = "black"
 clef_image_path = "clef.png"  # Path to uploaded clef image
+
+# Get the directory of the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Add some styling
 st.markdown("""
@@ -477,16 +482,17 @@ if selected == "Notes":
             # Play the MP3 file when the button is clicked
             # Play a sequence of MP3 files when the button is clicked
             if st.button("▶ ", key="play_notes_sequence"):
-                audio_files = [f"audio_mp3/{note}.mp3" for note in notes_notes_tab]  # List of MP3 file paths
-                for audio_file_path in audio_files:
-                    if os.path.exists(audio_file_path):  # Check if the file exists
-                        #st.write(f"Now playing: {audio_file_path.split('/')[-1]}")  # Display the file being played
-                        mixer.music.load(audio_file_path)  # Load the MP3 file
-                        mixer.music.play()  # Play the MP3 file
-
-                        # Wait for the current file to finish playing
-                        while mixer.music.get_busy():
-                            time.sleep(0.1)
+                audio_files = [f"audio_wav/{note}.wav" for note in notes_notes_tab]  # List of MP3 file paths
+                # Convert audio_files to full paths relative to the script's directory
+                wav_files = [os.path.join(current_dir, file) for file in audio_files]
+                # Merge audio files
+                merged_audio = np.concatenate([librosa.load(f, sr=None)[0] for f in wav_files])  # Merge audio
+                sample_rate = librosa.load(wav_files[0], sr=None)[1]  # Get the sample rate from the first file
+                # Save the merged audio to a temporary file
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
+                    sf.write(tmp_file.name, merged_audio, sample_rate)  # Write the merged audio to the file
+                    st.audio(tmp_file.name)  # Play the audio file in Streamlit
+            
             fig = draw_music_diagram(notes_notes_tab, clef_image_path)
             figures.append(fig)
             st.pyplot(fig)
@@ -565,15 +571,17 @@ elif selected == "Chords":
             #print("notes:  ",notes)
             figures = []
             if st.button("▶ ", key="play_scales_sequence"):
-                audio_files = [f"audio_mp3/{note}.mp3" for note in notes]  # List of MP3 file paths
-                for audio_file_path in audio_files:
-                    #st.write(f"Now playing: {audio_file_path.split('/')[-1]}")  # Display the file being played
-                    mixer.music.load(audio_file_path)  # Load the MP3 file
-                    mixer.music.play()  # Play the MP3 file
-
-                    # Wait for the current file to finish playing
-                    while mixer.music.get_busy():
-                        time.sleep(0.1)
+                audio_files = [f"audio_wav/{note}.wav" for note in notes]  # List of MP3 file paths
+                # Convert audio_files to full paths relative to the script's directory
+                wav_files = [os.path.join(current_dir, file) for file in audio_files]
+                # Merge audio files
+                merged_audio = np.concatenate([librosa.load(f, sr=None)[0] for f in wav_files])  # Merge audio
+                sample_rate = librosa.load(wav_files[0], sr=None)[1]  # Get the sample rate from the first file
+                # Save the merged audio to a temporary file
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
+                    sf.write(tmp_file.name, merged_audio, sample_rate)  # Write the merged audio to the file
+                    st.audio(tmp_file.name)  # Play the audio file in Streamlit
+                
             fig = draw_music_diagram(notes, clef_image_path)
             figures.append(fig)
             st.pyplot(fig)
@@ -674,15 +682,17 @@ elif selected == "Scales":
             # Play the MP3 file when the button is clicked
             # Play a sequence of MP3 files when the button is clicked
             if st.button("▶ ", key="play_scales_sequence"):
-                audio_files = [f"audio_mp3/{note}.mp3" for note in notes_scales]  # List of MP3 file paths
-                for audio_file_path in audio_files:
-                    #st.write(f"Now playing: {audio_file_path.split('/')[-1]}")  # Display the file being played
-                    mixer.music.load(audio_file_path)  # Load the MP3 file
-                    mixer.music.play()  # Play the MP3 file
-
-                    # Wait for the current file to finish playing
-                    while mixer.music.get_busy():
-                        time.sleep(0.1)
+                audio_files = [f"audio_wav/{note}.wav" for note in notes_scales]  # List of MP3 file paths
+                # Convert audio_files to full paths relative to the script's directory
+                wav_files = [os.path.join(current_dir, file) for file in audio_files]
+                # Merge audio files
+                merged_audio = np.concatenate([librosa.load(f, sr=None)[0] for f in wav_files])  # Merge audio
+                sample_rate = librosa.load(wav_files[0], sr=None)[1]  # Get the sample rate from the first file
+                # Save the merged audio to a temporary file
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
+                    sf.write(tmp_file.name, merged_audio, sample_rate)  # Write the merged audio to the file
+                    st.audio(tmp_file.name)  # Play the audio file in Streamlit
+                
             fig = draw_music_diagram(notes_scales, clef_image_path)
             st.pyplot(fig)
             ####Allowed Chords
@@ -702,15 +712,17 @@ elif selected == "Scales":
                     notes = [note + ('3' if chromatic_scale.index(note) >= chromatic_scale.index(triad_chromatic[0]) else '4')
     for note in triad_chromatic]
                     if st.button("▶ ", key=f"play_allowed_chord{i}"):
-                        audio_files = [f"audio_mp3/{note}.mp3" for note in notes]  # List of MP3 file paths
-                        for audio_file_path in audio_files:
-                            #st.write(f"Now playing: {audio_file_path.split('/')[-1]}")  # Display the file being played
-                            mixer.music.load(audio_file_path)  # Load the MP3 file
-                            mixer.music.play()  # Play the MP3 file
-
-                            # Wait for the current file to finish playing
-                            while mixer.music.get_busy():
-                                time.sleep(0.1)
+                        audio_files = [f"audio_wav/{note}.wav" for note in notes]  # List of MP3 file paths
+                        # Convert audio_files to full paths relative to the script's directory
+                        wav_files = [os.path.join(current_dir, file) for file in audio_files]
+                        # Merge audio files
+                        merged_audio = np.concatenate([librosa.load(f, sr=None)[0] for f in wav_files])  # Merge audio
+                        sample_rate = librosa.load(wav_files[0], sr=None)[1]  # Get the sample rate from the first file
+                        # Save the merged audio to a temporary file
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
+                            sf.write(tmp_file.name, merged_audio, sample_rate)  # Write the merged audio to the file
+                            st.audio(tmp_file.name)  # Play the audio file in Streamlit
+                                
                     fig1 = draw_music_diagram(notes, clef_image_path)
                     st.pyplot(fig1)
             

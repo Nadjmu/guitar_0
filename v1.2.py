@@ -628,6 +628,9 @@ elif selected == "Chords":
                 audio_files = [f"audio_wav/{note}.wav" for note in notes]  # List of MP3 file paths
                 # Convert audio_files to full paths relative to the script's directory
                 wav_files = [os.path.join(current_dir, file) for file in audio_files]
+
+                x, file_path = overlayChordNotes(triad_chromatic)
+                wav_files.append(os.path.join(current_dir,file_path))  # Add the temporary file path to the list
                 # Merge audio files
                 merged_audio = np.concatenate([librosa.load(f, sr=None)[0] for f in wav_files])  # Merge audio
                 sample_rate = librosa.load(wav_files[0], sr=None)[1]  # Get the sample rate from the first file
@@ -769,6 +772,9 @@ elif selected == "Scales":
                         audio_files = [f"audio_wav/{note}.wav" for note in notes]  # List of MP3 file paths
                         # Convert audio_files to full paths relative to the script's directory
                         wav_files = [os.path.join(current_dir, file) for file in audio_files]
+                        
+                        x, file_path = overlayChordNotes(triad_chromatic)
+                        wav_files.append(os.path.join(current_dir,file_path))  # Add the temporary file path to the list
                         # Merge audio files
                         merged_audio = np.concatenate([librosa.load(f, sr=None)[0] for f in wav_files])  # Merge audio
                         sample_rate = librosa.load(wav_files[0], sr=None)[1]  # Get the sample rate from the first file

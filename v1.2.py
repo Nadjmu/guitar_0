@@ -4,6 +4,7 @@ from music_theory import chromatic_scale, all_notes, chord_type, chord_type_abbr
 from music_diagram import draw_music_diagram
 from fretboard import draw_fretboard
 from io import BytesIO
+from pydub import AudioSegment
 import time
 import os
 import librosa
@@ -162,7 +163,46 @@ def getHighlightedNotes(triad_chromatic):
     return indices
 
 
+def overlayChordNotes(triad_chromatic, directory="audio_wav/"):
+    """
+    Overlays the notes of a chord given by triad_chromatic.
+    
+    Args:
+        triad_chromatic (list of str): List of note names (e.g., [E, A, C])
+        directory (str): Optional path to the folder where the .wav files are stored.
 
+    Returns:
+        tuple: (AudioSegment object of the chord, path to temporary output .wav file)
+    """
+    audio_segments = []
+    
+    # Load audio files
+    notes = [note + ('3' if chromatic_scale.index(note) >= chromatic_scale.index(triad_chromatic[0]) else '4') for note in triad_chromatic]
+    for note in notes:
+        path = os.path.join(directory, f"{note}.wav")
+        if os.path.exists(path):
+            audio = AudioSegment.from_wav(path)
+            audio_segments.append(audio)
+        else:
+            raise FileNotFoundError(f"Note file not found: {path}")
+
+    # Pad with silence so all notes are the same length
+    max_len = max(len(seg) for seg in audio_segments)
+    padded_segments = [
+        seg + AudioSegment.silent(duration=max_len - len(seg))
+        for seg in audio_segments
+    ]
+
+    # Overlay notes
+    chord = padded_segments[0]
+    for seg in padded_segments[1:]:
+        chord = chord.overlay(seg)
+
+    # Write to temporary file
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    chord.export(temp_file.name, format="wav")
+
+    return chord, temp_file.name
 
 def ChangeButtonColour(widget_label, prsd_status): #GLOBAL
     btn_bg_colour = pressed_colour if prsd_status == True else unpressed_colour
@@ -370,7 +410,21 @@ def get_scaletype_str_key(): #Output: C, D, E, ... #Chords
                 return "Diatonic", key[4:]
     return "", ""
 
-
+def roman_numerals_to_chord_type(roman_numeral):
+    """
+    Convert a Roman numeral to a chord type.
+    """
+    if roman_numeral.isupper():
+        if roman_numeral.endswith("+"):
+            return "Aug"
+        return "Maj"
+    elif roman_numeral.islower():
+        if roman_numeral.endswith("°"):
+            return "dim"
+        return "min"
+    else:
+        return "Unknown"  # For unsupported Roman numerals  
+    
 ####################
 def get_roman_numerals(intervals):
     roman_numerals = ["I", "II", "III", "IV", "V", "VI", "VII"]  # Roman numerals for scale degrees
@@ -699,7 +753,7 @@ elif selected == "Scales":
             st.subheader("Allowed Chords")
             button_labels = []
             for i, chord in enumerate(allowed_chords):
-                button_label = f"{roman_numerals[i]}: {','.join(chord)}"
+                button_label = roman_numerals[i]+": "+chord[0]+roman_numerals_to_chord_type(roman_numerals[i])+" "+f"({'-'.join(chord)})"
                 button_labels.append(button_label)
                 button_key = f"chord_{i}"
                 chord_obj = Chord(chord[0], allowed_chords_num[i])
@@ -731,7 +785,7 @@ elif selected == "Scales":
     
 
     with fretboard_col:
-        for i in range(13):
+        for i in range(10):
             st.write("")
 
         if has_active_str_and_stm():
@@ -740,16 +794,55 @@ elif selected == "Scales":
             fig = draw_fretboard(True, coordinates_notes_scales_tab)
             st.pyplot(fig)
 
-            for i in range(4):
+            for i in range(1):
                 st.write("")
 
+            chord_progression_label = [] #I, ii°, ....
+            chord_progression_temp_files = []
+            for i,displayed_chord in  enumerate(st.session_state.scales_tab_chord_list):
+                x, file_path = overlayChordNotes(getTriadChromatic(displayed_chord.root_note,displayed_chord.interval)) 
+                chord_progression_temp_files.append(file_path)
+                index = 0
+                for k, chord in enumerate(allowed_chords):
+                    if displayed_chord.root_note == chord[0]:
+                        index = k
+                
+                label = (roman_numerals[index])
+                chord_progression_label.append(label)
+
+            st.subheader("Current Chord Progression: "+"     "+f"{'-'.join(chord_progression_label)}")
+            
+            if st.button("▶ ", key=f"play_chord_progression{i}"):
+                repeated_audio_segments = []
+    
+                for file in chord_progression_temp_files:
+                    full_path = os.path.join(current_dir, file)
+                    
+                    # Load audio
+                    audio, sr = librosa.load(full_path, sr=None)
+                    
+                    # Repeat 4 times
+                    repeated_audio = np.tile(audio, 4)  # Repeat the waveform 4 times
+                    
+                    repeated_audio_segments.append(repeated_audio)
+
+                # Concatenate all repeated chord segments
+                merged_audio = np.concatenate(repeated_audio_segments)
+                
+                # Save to temp file
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
+                    sf.write(tmp_file.name, merged_audio, sr)
+                    st.audio(tmp_file.name)
+            
             chord_labels = [] #I, ii°, ....
+            
             for i,displayed_chord in  enumerate(st.session_state.scales_tab_chord_list):
                 index = 0
                 for k, chord in enumerate(allowed_chords):
                     if displayed_chord.root_note == chord[0]:
                         index = k
-                label = (roman_numerals[index]+": "+str(displayed_chord))
+                
+                label = (roman_numerals[index]+": "+str(displayed_chord.root_note)+roman_numerals_to_chord_type(roman_numerals[index]))
                 chord_labels.append(label)
                 
                 triad_chromatic = getTriadChromatic(displayed_chord.root_note, displayed_chord.interval)

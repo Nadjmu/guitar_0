@@ -1,5 +1,5 @@
 matplotlib>=3.0.0
-numpy>=1.20.0    # matplotlib dependency
+numpy>=1.20.0
 streamlit>=1.0.0
 librosa==0.10.0
 soundfile==0.12.1
@@ -7,3 +7,4 @@ setuptools>=58.0.0
 google-generativeai
 python-dotenv
 pydub==0.25.1
+pyaudioop

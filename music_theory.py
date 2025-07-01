@@ -7,8 +7,8 @@ all_notes = {'E2': ['E',-3.5], 'F2':['F',-3.0], 'Gb2':['Gb',-2.5], 'G2':['G',-2.
 
 modes_diatonic = ['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Myxolodian', 'Aoelian', 'Locrian']
 
-chord_type = ['Major', 'Minor', 'Diminished', 'Augmented']
-chord_type_abbr = ['maj', 'min', 'dim', 'aug']
+chord_type = ['Major', 'Minor', 'Diminished', 'Augmented',"Major7", "Dominant7", "Minor7", "Minor Major 7", "Diminished7","Major9", "Dominant9", "Minor9", "Add9", "b9", "#9","Major11", "Dominant11", "Minor11", "#11", "sus4", "sus2",]
+chord_type_abbr = ['maj', 'min', 'dim', 'aug', 'Maj7', "7", "m7", "mMaj7", "dim7", "Maj9", "9", "m9", "Add9", "b9", "#9", "Maj11", "11", "m11", "#11", 'sus4', 'sus2']
 
 diatonic_intervals = ['W','W','H','W','W','W','H']
 harmonic_minor_intervals = ['W','H','W','W','H','WH','H']

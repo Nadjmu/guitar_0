@@ -6,4 +6,4 @@ soundfile==0.12.1
 setuptools>=58.0.0
 google-generativeai
 python-dotenv
-pydub
+pydub==0.25.1

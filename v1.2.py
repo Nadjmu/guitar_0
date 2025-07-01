@@ -363,7 +363,7 @@ def get_chordtype_ctr_key(): #Output: Major, Minor, ... #Chords
     
     for key, state_dict in st.session_state.button_states_chords_tab.items():
         if key.startswith('CTT') and state_dict.get('state', False):
-            return key[3:]  # Returns the root
+            return key[3:]  # Returns the chord type
     return None
 
 def has_active_str_and_stm():      #Scales 
@@ -398,7 +398,7 @@ def get_root_str_key(): #Output: C, D, E, ... #Scales
             return key[3:]  # Returns the root
     return None
 
-def get_scaletype_str_key(): #Output: C, D, E, ... #Chords 
+def get_scaletype_str_key(): #Output: C, D, E, ... #Scales 
     if 'button_states_scales_tab' not in st.session_state:
         return "",""
     
@@ -617,7 +617,7 @@ elif selected == "Chords":
             triad_chromatic = getTriadChromatic(root, interval_list)
             #print("triad chromatic: ",triad_chromatic)
             st.session_state.chords_tab_chord_list = [] #reset list
-            addChordChordsTab(root, interval_list)
+            addChordChordsTab(root, interval_list) ## Here we add the chord to the list st.session_state.chords_tab_chord_list !!!!
             st.subheader(f"{root}{chord_type_abbr[chord_type.index(chord_type_1)]} ({triad_chromatic[0]} {triad_chromatic[1]} {triad_chromatic[2]})")
             # Get notes in activation order:
             notes = [note + ('3' if chromatic_scale.index(note) >= chromatic_scale.index(triad_chromatic[0]) else '4')

@@ -4,6 +4,7 @@ from music_theory import chromatic_scale, all_notes, chord_type, chord_type_abbr
 from music_diagram import draw_music_diagram
 from fretboard import draw_fretboard
 from io import BytesIO
+
 import time
 import os
 import librosa

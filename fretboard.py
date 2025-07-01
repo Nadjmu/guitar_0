@@ -23,51 +23,72 @@ notes_color = [
     (0.82, 0.32, 0.36)     # Very light red
 ]
 
-def draw_fretboard(show_notes=True, highlighted_notes=[[0,0]]): #notes is an array that gives the coordinates on the freboard of the notes
+def draw_fretboard(show_notes=True, highlighted_notes=[[0,0]]):
     chromatic_scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'bB', 'B']
     
-    fig, ax = plt.subplots(figsize=(10, 1.5), facecolor='black')  # Adjust size to fit your layout
-    num_frets = 12  # Number of frets on the guitar fretboard
+    # Define color mapping based on the last entry
+    color_mapping = {
+        0: (0.65, 0.10, 0.18, 1.0),    # Deep burgundy (original color for index 0)
+        1: (0.72, 0.18, 0.26, 1.0),     # Rich red (original color for index 1)
+        2: (0.78, 0.25, 0.32, 1.0),     # Medium red (original color for index 2)
+        3: (0.2, 0.4, 1.0, 0.7),        # Light transparent blue
+        4: (0.4, 0.8, 0.2, 0.7),        # Light transparent green
+        5: (0.6, 0.2, 0.8, 0.7)         # Light transparent purple
+    }
+    
+    fig, ax = plt.subplots(figsize=(10, 1.5), facecolor='black')
+    num_frets = 12
     num_strings = 6
 
-    # Draw the strings y-coordinates
+    # Draw the strings
     for string in range(num_strings):
-        ax.plot([0, num_frets], [string, string], color=(0.8, 0.643, 0.0), lw=4)  # Line width as string thickness
+        ax.plot([0, num_frets], [string, string], color=(0.8, 0.643, 0.0), lw=4)
 
-    # Draw the frets x-coordinates
-    ax.plot([0, 0], [-0.5, 5.5], color='white', lw=2)  # fret 0 is white 
-    for fret in range(1,num_frets + 1):
-        ax.plot([fret, fret], [-0.5, 5.5], color=(0.6, 0.482, 0.0), lw=2)  # Line width as fret thickness
+    # Draw the frets
+    ax.plot([0, 0], [-0.5, 5.5], color='white', lw=2)
+    for fret in range(1, num_frets + 1):
+        ax.plot([fret, fret], [-0.5, 5.5], color=(0.6, 0.482, 0.0), lw=2)
 
-    # Draw circles on 3rd, 5th, 7th, 9th and 11th fret
+    # Draw fret markers
     for i in range(5):
-        circle = Ellipse((2.5+2*i, 2.5), width=0.05, height=0.1, color='white', edgecolor='black')  # Adjust position and radius as needed
+        circle = Ellipse((2.5+2*i, 2.5), width=0.05, height=0.1, color='white', edgecolor='black')
         ax.add_patch(circle)
 
-    # Optionally add notes
+    # Add note labels
     if show_notes:
-        #notes = ['E', 'A', 'D', 'G', 'B', 'E']  # Open string notes for standard tuning
         for string in range(6):
             start_note = string_notes[string]
             start_index = chromatic_scale.index(start_note)
-
             for fret in range(num_frets + 1):
                 note_index = (start_index + fret) % 12 
                 note = chromatic_scale[note_index]    
-                ax.text(fret-0.2, string, note, color='white', ha='center', va='center', fontweight='bold', alpha=0.5, zorder = 4)
+                ax.text(fret-0.2, string, note, color='white', ha='center', va='center', 
+                        fontweight='bold', alpha=0.5, zorder=4)
     
+    # Add highlighted notes with color based on last entry
     for highlighted_note in highlighted_notes:
-        # Add the rectangle patch to highlight the segment
         highlight_fret = highlighted_note[0]
         highlight_string = highlighted_note[1]
-        highlight_width = 0.38          #golden ratio
+        highlight_width = 0.38
         highlight_height = 0.3
-        ax.add_patch(Rectangle((highlight_fret-highlight_width, highlight_string - highlight_height/2), highlight_width-0.025, highlight_height, color=notes_color[highlighted_note[2]], alpha=1.0, zorder=3))
-    
+        
+        # Get color index (default to 0 if not specified)
+        color_idx = highlighted_note[2] if len(highlighted_note) > 2 else 0
+        
+        # Get color from mapping (default to first color if not found)
+        note_color = color_mapping.get(color_idx, color_mapping[0])
+        
+        ax.add_patch(Rectangle(
+            (highlight_fret-highlight_width, highlight_string - highlight_height/2),
+            highlight_width-0.025, 
+            highlight_height,
+            color=note_color,
+            alpha=note_color[3],  # Use alpha from the color tuple
+            zorder=3
+        ))
 
-#wine red color=(0.627, 0.078, 0.157)
     ax.set_ylim(-0.5, 5.5)
-    ax.axis('off')  # Hide axes
+    ax.axis('off')
     
     return fig
 

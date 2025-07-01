@@ -33,7 +33,8 @@ def draw_fretboard(show_notes=True, highlighted_notes=[[0,0]]):
         2: (0.78, 0.25, 0.32, 1.0),     # Medium red (original color for index 2)
         3: (0.2, 0.4, 1.0, 0.7),        # Light transparent blue
         4: (0.4, 0.8, 0.2, 0.7),        # Light transparent green
-        5: (0.6, 0.2, 0.8, 0.7)         # Light transparent purple
+        5: (0.6, 0.2, 0.8, 0.7),         # Light transparent purple
+        6: (0.2, 0.7, 0.7, 0.7)       # Light transparent cyan  
     }
     
     fig, ax = plt.subplots(figsize=(10, 1.5), facecolor='black')

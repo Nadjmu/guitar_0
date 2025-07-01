@@ -4,7 +4,6 @@ from music_theory import chromatic_scale, all_notes, chord_type, chord_type_abbr
 from music_diagram import draw_music_diagram
 from fretboard import draw_fretboard
 from io import BytesIO
-from pydub import AudioSegment
 import time
 import os
 import librosa
@@ -245,44 +244,39 @@ def getHighlightedNotes(triad_chromatic):
 
 def overlayChordNotes(triad_chromatic, directory="audio_wav/"):
     """
-    Overlays the notes of a chord given by triad_chromatic.
-    
-    Args:
-        triad_chromatic (list of str): List of note names (e.g., [E, A, C])
-        directory (str): Optional path to the folder where the .wav files are stored.
-
-    Returns:
-        tuple: (AudioSegment object of the chord, path to temporary output .wav file)
+    Overlays the notes of a chord using librosa instead of pydub
     """
-    audio_segments = []
+    y_total = None
+    sr = None
     
-    # Load audio files
     notes = [note + ('3' if chromatic_scale.index(note) >= chromatic_scale.index(triad_chromatic[0]) else '4') for note in triad_chromatic]
+    
     for note in notes:
         path = os.path.join(directory, f"{note}.wav")
-        if os.path.exists(path):
-            audio = AudioSegment.from_wav(path)
-            audio_segments.append(audio)
-        else:
+        if not os.path.exists(path):
             raise FileNotFoundError(f"Note file not found: {path}")
-
-    # Pad with silence so all notes are the same length
-    max_len = max(len(seg) for seg in audio_segments)
-    padded_segments = [
-        seg + AudioSegment.silent(duration=max_len - len(seg))
-        for seg in audio_segments
-    ]
-
-    # Overlay notes
-    chord = padded_segments[0]
-    for seg in padded_segments[1:]:
-        chord = chord.overlay(seg)
-
+        
+        y, sr = librosa.load(path, sr=None)
+        
+        if y_total is None:
+            y_total = y
+        else:
+            # Pad the shorter array with zeros
+            if len(y) > len(y_total):
+                y_total = np.pad(y_total, (0, len(y) - len(y_total)))
+            elif len(y) < len(y_total):
+                y = np.pad(y, (0, len(y_total) - len(y)))
+            
+            y_total = y_total + y
+    
+    # Normalize to prevent clipping
+    y_total = y_total / np.max(np.abs(y_total))
+    
     # Write to temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-    chord.export(temp_file.name, format="wav")
-
-    return chord, temp_file.name
+    sf.write(temp_file.name, y_total, sr)
+    
+    return y_total, temp_file.name
 
 def ChangeButtonColour(widget_label, prsd_status): #GLOBAL
     btn_bg_colour = pressed_colour if prsd_status == True else unpressed_colour
